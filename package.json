@@ -1,0 +1,16 @@
+{
+  "name": "video-1",
+  "version": "1.0.0",
+  "type": "module",
+  "description": "Vertical 3D cartoon reels with code",
+  "main": "render.js",
+  "scripts": {
+    "render": "node render.js",
+    "stills": "node render.js --stills 0,0.5,1.0,1.5",
+    "test-render": "node render.js --duration 2 --fps 30"
+  },
+  "dependencies": {
+    "puppeteer-core": "^24.40.0",
+    "three": "^0.183.2"
+  }
+}

@@ -1,0 +1,780 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>comp2 – You need 2 hours at the gym</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{
+  width:1080px;height:1920px;overflow:hidden;
+  background:#07142B;
+  font-family:'Inter','Segoe UI',Arial,sans-serif;
+  -webkit-font-smoothing:antialiased;
+}
+#wrap{position:relative;width:1080px;height:1920px}
+#bg,#fx{
+  display:block;position:absolute;top:0;left:0;
+  width:1080px!important;height:1920px!important;
+}
+#fx{pointer-events:none;z-index:2}
+#ui{position:absolute;top:0;left:0;width:1080px;height:1920px;pointer-events:none;z-index:3}
+
+/* ── Chip ───────────────────────────────────── */
+#chip{
+  position:absolute;top:72px;left:50%;transform:translateX(-50%);
+  background:#3BFFB0;color:#07142B;
+  padding:14px 36px;border-radius:60px;
+  font-size:28px;font-weight:900;letter-spacing:2.5px;text-transform:uppercase;
+  white-space:nowrap;
+}
+
+/* ── Card ───────────────────────────────────── */
+#card{
+  position:absolute;top:230px;left:50%;transform:translateX(-50%);
+  background:rgba(7,20,43,0.93);
+  border:1.5px solid rgba(245,247,250,0.10);
+  border-radius:26px;padding:40px 52px;width:920px;min-height:180px;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  color:#F5F7FA;line-height:1.5;
+  box-shadow:0 12px 64px rgba(0,0,0,0.65),0 2px 0 rgba(59,255,176,0.07) inset;
+}
+.c-label{font-size:21px;font-weight:600;color:#8A97A8;letter-spacing:2.5px;text-transform:uppercase;margin-bottom:14px}
+.c-big{font-size:98px;font-weight:900;line-height:1;color:#F5F7FA;text-align:center}
+.c-strike{text-decoration:line-through;color:#ff5555;font-size:58px;font-weight:900;line-height:1.1}
+.c-accent{color:#3BFFB0}
+.c-rule{font-size:70px;font-weight:900;line-height:1.1;text-align:center}
+.c-rule .gt{color:#3BFFB0}
+
+/* counters */
+.ctr-row{display:flex;gap:52px;align-items:flex-end}
+.ctr-col{text-align:center}
+.cval{font-size:74px;font-weight:900;color:#3BFFB0;line-height:1}
+.clbl{font-size:21px;font-weight:600;color:#8A97A8;margin-top:5px;letter-spacing:1.5px;text-transform:uppercase}
+
+/* energy */
+.e-wrap{width:100%}
+.e-lbl{font-size:21px;font-weight:600;color:#8A97A8;margin-bottom:10px;letter-spacing:1px;text-transform:uppercase}
+.e-track{height:28px;background:rgba(138,151,168,0.14);border-radius:14px;overflow:hidden;border:1px solid rgba(138,151,168,0.18)}
+.e-fill{height:100%;border-radius:14px;background:linear-gradient(90deg,#3BFFB0,#00cc88);transition:width 0.1s linear}
+
+/* checklist */
+.cklist{list-style:none;text-align:left;width:100%}
+.cklist li{font-size:30px;padding:9px 0;display:flex;align-items:center;gap:14px;color:#8A97A8;font-weight:600}
+.cklist li.done{color:#F5F7FA}
+.ckb{width:34px;height:34px;border:2.5px solid #8A97A8;border-radius:7px;flex-shrink:0;
+  display:flex;align-items:center;justify-content:center;font-size:20px}
+.ckb.on{background:#3BFFB0;border-color:#3BFFB0;color:#07142B;font-weight:900}
+.c-tot{font-size:60px;font-weight:900;color:#F5F7FA;margin-top:14px}
+
+/* move icons */
+.mv-row{display:flex;gap:28px;flex-wrap:wrap;justify-content:center;margin-top:6px}
+.mvc{width:148px;height:148px;background:rgba(138,151,168,0.07);border-radius:18px;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  font-size:50px;color:#F5F7FA;border:1.5px solid rgba(138,151,168,0.14);position:relative}
+.mvc.active{border-color:#3BFFB0;background:rgba(59,255,176,0.07)}
+.mvc.ouch{border-color:#ff5555;animation:wobble 0.4s ease-in-out infinite alternate}
+.mvc .ml{font-size:17px;font-weight:600;color:#8A97A8;margin-top:5px;letter-spacing:0.5px;text-transform:uppercase}
+.mvc .badge{position:absolute;top:-10px;right:-10px;width:30px;height:30px;
+  background:#3BFFB0;border-radius:50%;display:flex;align-items:center;justify-content:center;
+  font-size:16px;color:#07142B;font-weight:900}
+@keyframes wobble{0%{transform:rotate(-5deg)}100%{transform:rotate(5deg)}}
+
+/* rounds */
+.rdots{display:flex;gap:24px;margin-top:10px}
+.rdot{width:48px;height:48px;border-radius:50%;background:rgba(138,151,168,0.14);border:2.5px solid rgba(138,151,168,0.22)}
+.rdot.on{background:#3BFFB0;border-color:#3BFFB0}
+
+/* calendar */
+.cal{display:grid;grid-template-columns:repeat(7,58px);gap:12px;margin-top:12px}
+.cday{width:58px;height:58px;border-radius:10px;background:rgba(138,151,168,0.1);
+  border:1.5px solid rgba(138,151,168,0.2);display:flex;align-items:center;
+  justify-content:center;font-size:26px;color:#2a3a4a}
+.cday.on{background:#3BFFB0;border-color:#3BFFB0;color:#07142B;font-weight:900;font-size:28px}
+
+/* CTA */
+.cta-word{font-size:116px;font-weight:900;color:#3BFFB0;letter-spacing:5px;line-height:1}
+.cta-sub{font-size:34px;font-weight:600;color:#8A97A8;margin-top:14px}
+
+/* done stamp */
+.done-stamp{font-size:56px;font-weight:900;color:#3BFFB0;border:4px solid #3BFFB0;
+  padding:6px 28px;border-radius:14px;margin-top:14px;letter-spacing:4px;
+  display:inline-block;transform:rotate(-3deg)}
+
+/* ── Subtitle ───────────────────────────────── */
+#sub{
+  position:absolute;bottom:92px;left:50%;transform:translateX(-50%);
+  width:950px;text-align:center;
+  background:rgba(7,20,43,0.80);border-radius:14px;padding:22px 36px;
+  border-top:1.5px solid rgba(59,255,176,0.10);
+}
+#spk{font-size:21px;font-weight:600;color:#3BFFB0;letter-spacing:2.5px;text-transform:uppercase;margin-bottom:6px}
+#line{font-size:35px;font-weight:600;color:#F5F7FA;line-height:1.45}
+</style>
+</head>
+<body>
+<div id="wrap">
+  <canvas id="bg"></canvas>
+  <canvas id="fx"></canvas>
+  <div id="ui">
+    <div id="chip"></div>
+    <div id="card"></div>
+    <div id="sub"><div id="spk"></div><div id="line"></div></div>
+  </div>
+</div>
+
+<script type="importmap">{"imports":{
+  "three":"./node_modules/three/build/three.module.js",
+  "three/addons/":"./node_modules/three/examples/jsm/"
+}}</script>
+<script type="module">
+import * as THREE from 'three';
+import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
+
+// ─── CONSTANTS ────────────────────────────────────────────────────────────────
+const W=1080, H=1920, ASPECT=W/H;
+const COL={
+  bg:    0x07142B,
+  navy:  0x0B1F3A,
+  white: 0xF5F7FA,
+  grey:  0x8A97A8,
+  mint:  0x3BFFB0,
+  skin:  0xD4956A,
+  hair:  0x1A1008,
+  track: 0x0E2448,
+  stripe:0xF5F7FA,
+  shoe:  0xF5F7FA,
+  rack:  0x1C2E42,
+  rBar:  0x2A3A4E,
+  bench: 0x1A2D3E,
+  plant: 0x1A4030,
+  pot:   0x25201A,
+  mouth: 0x140808,
+  pupil: 0x0A0A0A,
+};
+
+// ─── SCRIPT (from script.md — source of truth) ────────────────────────────────
+const LINES=[
+  {start:0,   end:2,   speaker:'ME',      name:'COACH VIK',
+   line:"You don't need two hours at the gym!",
+   chip:'MYTH: 2 HOURS AT THE GYM', card:'countdown'},
+  {start:2,   end:4,   speaker:'SIDEKICK',name:'TICK',
+   line:"Fifteen minutes. Four moves. Zero equipment.",
+   chip:'TICK, THE STOPWATCH', card:'counters'},
+  {start:4,   end:6.5, speaker:'SIDEKICK',name:'TICK',
+   line:"Step one. Warm up. Two minutes.",
+   chip:'STEP 1: WARM-UP', card:'step1'},
+  {start:6.5, end:8.5, speaker:'ME',      name:'COACH VIK',
+   line:"That's it? Fifteen minutes, no equipment?",
+   chip:'NO EQUIPMENT, ANY ROOM', card:'jaw-drop'},
+  {start:8.5, end:12,  speaker:'ME',      name:'COACH VIK',
+   line:'Comment "Routine" and I\'ll send you the full guide.',
+   chip:'COMMENT "ROUTINE"', card:'cta'},
+];
+const TOTAL=12;
+
+window.cues=[
+  {t:4,   type:'tick'},
+  {t:6.5, type:'chime'},
+];
+
+// ─── SHOT LIST ────────────────────────────────────────────────────────────────
+// wide for SIDEKICK step (line 2), close-up otherwise
+const SHOTS=[
+  {type:'cu-vik',  push:0.040}, // 0 ME
+  {type:'cu-tick', push:0.040}, // 1 SIDEKICK
+  {type:'wide',    push:0.022}, // 2 SIDEKICK step 1 (wide)
+  {type:'cu-vik',  push:0.040}, // 3 ME jaw drop
+  {type:'cu-vik',  push:0.028}, // 4 ME CTA
+];
+const CAMD={
+  'wide':   {pos:new THREE.Vector3(0,2.4,10.5),  tgt:new THREE.Vector3(0,1.5,0),   fov:42},
+  'cu-vik': {pos:new THREE.Vector3(-1.6,3.05,6.4),tgt:new THREE.Vector3(-1.6,2.5,0),fov:38},
+  'cu-tick':{pos:new THREE.Vector3(1.8,2.1,5.8),  tgt:new THREE.Vector3(1.8,1.74,0),fov:38},
+};
+
+// ─── THREE.JS SETUP ───────────────────────────────────────────────────────────
+const bgC=document.getElementById('bg');
+const renderer=new THREE.WebGLRenderer({canvas:bgC,antialias:true,preserveDrawingBuffer:true});
+renderer.setSize(W,H);renderer.setPixelRatio(1);
+renderer.toneMapping=THREE.ACESFilmicToneMapping;renderer.toneMappingExposure=1.08;
+renderer.shadowMap.enabled=true;renderer.shadowMap.type=THREE.PCFSoftShadowMap;
+
+const scene=new THREE.Scene();
+scene.background=new THREE.Color(COL.bg);
+scene.fog=new THREE.FogExp2(COL.bg,0.020);
+
+// Environment map for reflections
+{
+  const pmr=new THREE.PMREMGenerator(renderer);
+  pmr.compileEquirectangularShader();
+  const env=pmr.fromScene(new RoomEnvironment(),0.04).texture;
+  scene.environment=env;
+  pmr.dispose();
+}
+
+const camera=new THREE.PerspectiveCamera(42,ASPECT,0.1,100);
+camera.position.set(0,2.4,10.5);camera.lookAt(0,1.5,0);
+
+// ─── MATERIAL HELPERS ─────────────────────────────────────────────────────────
+const mk=(color,rough=0.72,metal=0,extra={})=>
+  new THREE.MeshStandardMaterial({color,...extra,roughness:rough,metalness:metal});
+const mkT=(color,opacity,extra={})=>
+  new THREE.MeshStandardMaterial({color,transparent:true,opacity,...extra,roughness:1,depthWrite:false});
+
+const MAT={
+  floor:    mk(0x151E2A,0.22,0.70,{envMapIntensity:0.9}),
+  rubMat:   mk(0x0D1821,0.96),
+  backWall: mk(COL.navy,0.88),
+  trim:     mk(COL.white,0.48,0.12),
+  rack:     mk(COL.rack,0.68,0.36),
+  rBar:     mk(COL.rBar,0.44,0.56),
+  mintAcc:  mk(COL.mint,0.38,0.26,{emissive:new THREE.Color(COL.mint).multiplyScalar(0.08)}),
+  plant:    mk(COL.plant,0.9),
+  pot:      mk(COL.pot,0.84),
+  winGlass: mkT(0xBDE0FF,0.14,{side:THREE.DoubleSide}),
+  winFrame: mk(0xE0E8F0,0.4,0.16),
+  skin:     mk(COL.skin,0.72),
+  eyeW:     mk(COL.white,0.24,0,{emissive:new THREE.Color(0x1a1a1a)}),
+  pupil:    mk(COL.pupil,0.4),
+  glint:    mk(COL.white,0,0,{emissive:new THREE.Color(COL.white),emissiveIntensity:1}),
+  track:    mk(COL.track,0.84),
+  stripe:   mk(COL.stripe,0.52,0.1),
+  shoe:     mk(COL.shoe,0.44,0.16),
+  hair:     mk(COL.hair,0.84),
+  brow:     mk(COL.hair,0.9),
+  mouth:    mk(COL.mouth,0.9),
+  teeth:    mk(0xF8F8F8,0.38),
+  tickBody: mk(0xEEEEEE,0.28,0.42,{envMapIntensity:1.2}),
+  tickBezel:mk(COL.navy,0.58,0.32),
+  tickMint: mk(COL.mint,0.3,0.26,{emissive:new THREE.Color(COL.mint).multiplyScalar(0.22)}),
+  tickFace: mk(0xFAFAFA,0.18,0.12,{envMapIntensity:0.6}),
+  tickMark: mk(0x2A3A50,0.6),
+  tickHand: mk(COL.mint,0.3,0.22,{emissive:new THREE.Color(COL.mint).multiplyScalar(0.14)}),
+  tickEye:  mk(0x07142B,0.5),
+  blobSh:   mkT(0x000000,0.20),
+  wGlow:    mkT(0xD0EEFF,0.26,{side:THREE.DoubleSide}),
+  dust:     mkT(0xFFF8E8,0.062,{side:THREE.DoubleSide}),
+  bench:    mk(COL.bench,0.72),
+};
+
+// ─── GEO HELPERS ──────────────────────────────────────────────────────────────
+function bx(w,h,d,mat,px=0,py=0,pz=0,rx=0,ry=0,rz=0){
+  const m=new THREE.Mesh(new THREE.BoxGeometry(w,h,d),mat);
+  m.position.set(px,py,pz);m.rotation.set(rx,ry,rz);
+  m.castShadow=true;m.receiveShadow=true;return m;
+}
+function cy(r,h,mat,px=0,py=0,pz=0){
+  const m=new THREE.Mesh(new THREE.CylinderGeometry(r,r,h,16),mat);
+  m.position.set(px,py,pz);m.castShadow=true;m.receiveShadow=true;return m;
+}
+function add(p,...kids){kids.forEach(k=>p.add(k));return p;}
+
+// ─── ENVIRONMENT ──────────────────────────────────────────────────────────────
+// Polished concrete floor
+{
+  const fl=new THREE.Mesh(new THREE.PlaneGeometry(32,32),MAT.floor);
+  fl.rotation.x=-Math.PI/2;fl.receiveShadow=true;scene.add(fl);
+  // Rubber training mat
+  const rm=new THREE.Mesh(new THREE.PlaneGeometry(5.6,7.8),MAT.rubMat);
+  rm.rotation.x=-Math.PI/2;rm.position.y=0.001;rm.receiveShadow=true;scene.add(rm);
+}
+// Back wall (navy) + white trim
+scene.add(bx(32,18,0.3,MAT.backWall,0,9,-6.5));
+scene.add(bx(32,0.18,0.42,MAT.trim,0,0.09,-6.3));  // base trim
+scene.add(bx(32,0.18,0.42,MAT.trim,0,16.1,-6.3));  // top trim
+
+// Left window wall
+scene.add(bx(0.3,18,32,MAT.backWall,-9.2,9,0));
+// Window panes (3)
+for(let i=0;i<3;i++){
+  const pane=new THREE.Mesh(new THREE.PlaneGeometry(2.65,5.9),MAT.winGlass);
+  pane.position.set(-9.06,3.5+i*5.9,-2.5+i*2.5);pane.rotation.y=Math.PI/2;scene.add(pane);
+  // top + bottom frame bars
+  scene.add(bx(2.75,0.1,0.1,MAT.winFrame,-9.06,3.5+i*5.9+2.95,-2.5+i*2.5));
+  scene.add(bx(2.75,0.1,0.1,MAT.winFrame,-9.06,3.5+i*5.9-2.95,-2.5+i*2.5));
+}
+// Light shafts (volumetric haze planes)
+{
+  const s1=new THREE.Mesh(new THREE.PlaneGeometry(3.5,13),MAT.dust);
+  s1.position.set(-4.9,5.5,0.5);s1.rotation.y=0.22;scene.add(s1);
+  const s2=new THREE.Mesh(new THREE.PlaneGeometry(2.5,11),MAT.dust);
+  s2.position.set(-3.8,5,2.5);s2.rotation.y=0.28;scene.add(s2);
+  // Window glow bloom
+  const wg=new THREE.Mesh(new THREE.PlaneGeometry(2.5,11),MAT.wGlow);
+  wg.position.set(-8.8,5.5,0);wg.rotation.y=Math.PI/2;scene.add(wg);
+}
+
+// Squat rack (right background)
+{
+  const rg=new THREE.Group();rg.position.set(5.6,0,-4.6);
+  [[-0.72,0],[0.72,0],[-0.72,-1.1],[0.72,-1.1]].forEach(([x,z])=>rg.add(bx(0.14,3.4,0.14,MAT.rack,x,1.7,z)));
+  rg.add(bx(1.56,0.1,0.1,MAT.rBar,0,2.95,0));
+  rg.add(bx(1.56,0.1,0.1,MAT.rBar,0,2.5,-1.1));
+  rg.add(bx(1.56,0.1,0.1,MAT.rBar,0,1.7,-0.55));
+  rg.add(bx(2.9,0.07,0.07,MAT.rBar,0,2.65,-0.42));
+  rg.add(bx(1.56,0.055,0.055,MAT.mintAcc,0,2.1,-0.55)); // mint accent bar
+  scene.add(rg);
+}
+// Bench (left background)
+{
+  const bg=new THREE.Group();bg.position.set(-5.9,0,-3.9);
+  bg.add(bx(2.1,0.22,0.68,MAT.bench,0,0.98,0));
+  [[-0.9,-0.28],[0.9,-0.28],[-0.9,0.28],[0.9,0.28]].forEach(([x,z])=>
+    bg.add(bx(0.09,0.98,0.09,MAT.rBar,x,0.49,z)));
+  scene.add(bg);
+}
+// Dumbbell rack (right far background)
+{
+  const drg=new THREE.Group();drg.position.set(6.6,0,-5.5);
+  drg.add(bx(2.1,1.3,0.45,MAT.rack,0,0.65,0));
+  for(let i=0;i<3;i++){
+    drg.add(cy(0.13,0.65,MAT.rBar,-0.65+i*0.65,1.38,0));
+    drg.add(cy(0.21,0.17,MAT.rack,-0.65+i*0.65,1.38,0.33));
+    drg.add(cy(0.21,0.17,MAT.rack,-0.65+i*0.65,1.38,-0.33));
+  }
+  scene.add(drg);
+}
+// Plant
+{
+  const pg=new THREE.Group();pg.position.set(7.9,0,-5.9);
+  pg.add(cy(0.3,0.55,MAT.pot,0,0.28,0));
+  for(let i=0;i<7;i++){
+    const a=i/7*Math.PI*2;
+    pg.add(bx(0.07,1.0,0.04,MAT.plant,Math.cos(a)*0.18,0.95,Math.sin(a)*0.18,0,0,a+0.4));
+  }
+  scene.add(pg);
+}
+
+// ─── COACH VIK ────────────────────────────────────────────────────────────────
+const vikG=new THREE.Group();vikG.position.set(-1.6,0,0);
+
+// Shoes
+const vikShL=bx(0.38,0.19,0.54,MAT.shoe,-0.23,0.095,0.1);
+const vikShR=bx(0.38,0.19,0.54,MAT.shoe, 0.23,0.095,0.1);
+// Lower legs + white outer stripe
+const vikLLL=bx(0.33,0.74,0.3,MAT.track,-0.23,0.56,0);
+const vikLLR=bx(0.33,0.74,0.3,MAT.track, 0.23,0.56,0);
+const vikSlegL=bx(0.055,0.74,0.34,MAT.stripe,-0.23-0.165-0.028,0.56,0);
+const vikSlegR=bx(0.055,0.74,0.34,MAT.stripe, 0.23+0.165+0.028,0.56,0);
+// Hips
+const vikHips=bx(0.78,0.65,0.34,MAT.track,0,1.1,0);
+// Torso
+const vikTorso=bx(0.90,1.12,0.42,MAT.track,0,1.76,0);
+// Zip strip (white vertical on front of jacket)
+const vikZip=bx(0.055,1.12,0.045,MAT.stripe,0,1.76,0.21);
+// Neck
+const vikNeck=bx(0.3,0.26,0.26,MAT.skin,0,2.38,0);
+
+// Head group (pivots for head sway/nod)
+const vikHG=new THREE.Group();vikHG.position.set(0,2.82,0);
+const vikHead=bx(0.92,0.86,0.72,MAT.skin,0,0,0);
+// Hair (short, neat)
+const vikHair=bx(0.92,0.24,0.72,MAT.hair,0,0.46,0);
+const vikHairS=bx(0.94,0.14,0.74,MAT.hair,0,0.30,0);
+// Eyebrows
+const vikBrowL=bx(0.30,0.08,0.09,MAT.brow,-0.22,0.26,0.37);
+const vikBrowR=bx(0.30,0.08,0.09,MAT.brow, 0.22,0.26,0.37);
+// Eyes: white + pupil + glint
+const vikEyLW=bx(0.24,0.19,0.07,MAT.eyeW,-0.22,0.10,0.37);
+const vikEyRW=bx(0.24,0.19,0.07,MAT.eyeW, 0.22,0.10,0.37);
+const vikPupL=bx(0.11,0.13,0.07,MAT.pupil,-0.22,0.08,0.40);
+const vikPupR=bx(0.11,0.13,0.07,MAT.pupil, 0.22,0.08,0.40);
+const vikGlL=bx(0.048,0.048,0.04,MAT.glint,-0.26,0.13,0.42);
+const vikGlR=bx(0.048,0.048,0.04,MAT.glint, 0.18,0.13,0.42);
+// Mouth (pivot group for open/close)
+const vikMG=new THREE.Group();vikMG.position.set(0,-0.14,0.37);
+const vikMouth=bx(0.32,0.11,0.07,MAT.mouth,0,0,0);
+const vikTeeth=bx(0.26,0.07,0.05,MAT.teeth,0,0.08,0);
+add(vikMG,vikMouth,vikTeeth);
+// Ears
+const vikEarL=bx(0.085,0.21,0.08,MAT.skin,-0.5,0,0);
+const vikEarR=bx(0.085,0.21,0.08,MAT.skin, 0.5,0,0);
+add(vikHG,vikHead,vikHair,vikHairS,vikBrowL,vikBrowR,
+    vikEyLW,vikEyRW,vikPupL,vikPupR,vikGlL,vikGlR,vikMG,vikEarL,vikEarR);
+
+// Arms (pivot from shoulder point)
+const vikALG=new THREE.Group();vikALG.position.set(-0.62,2.18,0);
+const vikUArmL=bx(0.28,0.74,0.28,MAT.track,0,-0.37,0);
+const vikSarmL=bx(0.055,0.74,0.32,MAT.stripe,-0.14-0.028,-0.37,0); // outer sleeve stripe
+const vikFArmL=bx(0.24,0.6,0.24,MAT.skin,0,-0.92,0);
+add(vikALG,vikUArmL,vikSarmL,vikFArmL);
+
+const vikARG=new THREE.Group();vikARG.position.set(0.62,2.18,0);
+const vikUArmR=bx(0.28,0.74,0.28,MAT.track,0,-0.37,0);
+const vikSarmR=bx(0.055,0.74,0.32,MAT.stripe, 0.14+0.028,-0.37,0);
+const vikFArmR=bx(0.24,0.6,0.24,MAT.skin,0,-0.92,0);
+add(vikARG,vikUArmR,vikSarmR,vikFArmR);
+
+// Contact shadow blob
+const vikSh=new THREE.Mesh(new THREE.PlaneGeometry(1.2,0.6),MAT.blobSh);
+vikSh.rotation.x=-Math.PI/2;vikSh.position.set(0,0.001,0.1);
+
+add(vikG,vikShL,vikShR,vikLLL,vikLLR,vikSlegL,vikSlegR,
+    vikHips,vikTorso,vikZip,vikNeck,vikHG,vikALG,vikARG,vikSh);
+scene.add(vikG);
+
+// ─── TICK (STOPWATCH ROBOT) ───────────────────────────────────────────────────
+const tickG=new THREE.Group();tickG.position.set(1.8,0,0);
+
+// Chunky stopwatch body (cylinder)
+const tickBody=new THREE.Mesh(new THREE.CylinderGeometry(0.52,0.52,0.44,32),MAT.tickBody);
+tickBody.position.set(0,1.74,0);tickBody.castShadow=true;
+
+// Navy bezel ring (torus)
+const tickBezel=new THREE.Mesh(new THREE.TorusGeometry(0.52,0.075,8,32),MAT.tickBezel);
+tickBezel.position.set(0,1.74,0);tickBezel.rotation.x=Math.PI/2;
+
+// Mint crown button on top + grip ridges
+const tickCrown=bx(0.14,0.26,0.14,MAT.tickMint,0,2.00,0);
+const tickGrip =bx(0.10,0.04,0.18,MAT.tickBezel,0,2.00,0);
+
+// Stubby legs + tiny feet
+const tickLL=bx(0.19,0.56,0.19,MAT.tickBody,-0.22,0.80,0);
+const tickLR=bx(0.19,0.56,0.19,MAT.tickBody, 0.22,0.80,0);
+const tickFL=bx(0.24,0.14,0.34,MAT.shoe,-0.22,0.51,0.07);
+const tickFR=bx(0.24,0.14,0.34,MAT.shoe, 0.22,0.51,0.07);
+
+// White dial face
+const tickFace=new THREE.Mesh(new THREE.CircleGeometry(0.43,32),MAT.tickFace);
+tickFace.position.set(0,1.74,0.527);
+
+// Tick marks on dial (12 marks, 4 longer at quarters)
+const tickMarks=new THREE.Group();tickMarks.position.set(0,1.74,0.525);
+for(let i=0;i<12;i++){
+  const a=i/12*Math.PI*2, r=0.33, big=(i%3===0);
+  const m=bx(big?0.042:0.026,big?0.095:0.058,0.02,MAT.tickMark,
+    Math.sin(a)*r,Math.cos(a)*r,0);
+  tickMarks.add(m);
+}
+
+// Eyes (grouped — morph between deadpan | | and pleased ^ ^)
+const tickELG=new THREE.Group();tickELG.position.set(-0.14,1.82,0.522);
+const tickEL=bx(0.072,0.19,0.04,MAT.tickEye,0,0,0);
+add(tickELG,tickEL);
+const tickERG=new THREE.Group();tickERG.position.set( 0.14,1.82,0.522);
+const tickER=bx(0.072,0.19,0.04,MAT.tickEye,0,0,0);
+add(tickERG,tickER);
+
+// ── Clock hands doubling as arms ──
+// Each hand pivot is at the dial center. The box extends upward (+y) from pivot.
+// rotation.z = 0 → hand points up (12 o'clock)
+// rotation.z = +π/2 → hand points left (9 o'clock)
+// rotation.z = −π/2 → hand points right (3 o'clock)
+
+// Minute hand (left arm) — longer
+const tickALG=new THREE.Group();tickALG.position.set(0,1.74,0.54);
+const tickHL=bx(0.040,0.60,0.030,MAT.tickHand,0,0.30,0); // extends up from pivot
+tickALG.rotation.z=3*Math.PI/4; // idle: ~7-8 o'clock (lower-left)
+add(tickALG,tickHL);
+
+// Hour hand (right arm) — shorter
+const tickARG=new THREE.Group();tickARG.position.set(0,1.74,0.54);
+const tickHR=bx(0.040,0.44,0.030,MAT.tickHand,0,0.22,0);
+tickARG.rotation.z=-3*Math.PI/4; // idle: ~4-5 o'clock (lower-right)
+add(tickARG,tickHR);
+
+// Second hand (rotating display on dial)
+const tickSHG=new THREE.Group();tickSHG.position.set(0,1.74,0.535);
+const tickSec=bx(0.025,0.38,0.025,MAT.tickMint,0,0.19,0);
+const tickSecCW=bx(0.025,0.10,0.025,MAT.tickMint,0,-0.05,0); // counterweight
+add(tickSHG,tickSec,tickSecCW);
+
+// Contact shadow
+const tickSh=new THREE.Mesh(new THREE.PlaneGeometry(0.95,0.52),MAT.blobSh);
+tickSh.rotation.x=-Math.PI/2;tickSh.position.set(0,0.001,0.08);
+
+add(tickG,tickBody,tickBezel,tickCrown,tickGrip,
+    tickLL,tickLR,tickFL,tickFR,
+    tickFace,tickMarks,tickELG,tickERG,
+    tickALG,tickARG,tickSHG,tickSh);
+scene.add(tickG);
+
+// ─── LIGHTS ───────────────────────────────────────────────────────────────────
+// Key: warm window light from left
+const keyL=new THREE.DirectionalLight(0xFFF5E0,2.9);
+keyL.position.set(-9,12,5);keyL.castShadow=true;
+keyL.shadow.mapSize.set(2048,2048);
+keyL.shadow.camera.left=-11;keyL.shadow.camera.right=11;
+keyL.shadow.camera.top=13;keyL.shadow.camera.bottom=-3;
+keyL.shadow.camera.near=1;keyL.shadow.camera.far=50;
+keyL.shadow.bias=-0.001;keyL.shadow.radius=3;
+scene.add(keyL);
+// Rim: cool purple-blue from behind
+const rimL=new THREE.DirectionalLight(0x9080FF,1.5);rimL.position.set(5,9,-10);scene.add(rimL);
+// Fill: weak
+const fillL=new THREE.DirectionalLight(0xC8E0F0,0.5);fillL.position.set(6,4,8);scene.add(fillL);
+// Ambient
+scene.add(new THREE.AmbientLight(0x1A2840,1.4));
+
+// ─── FX LAYER: grain + vignette (2D canvas overlay) ──────────────────────────
+const fxC=document.getElementById('fx');fxC.width=W;fxC.height=H;
+const fxCtx=fxC.getContext('2d');
+// Half-resolution grain tile (scaled up 2×)
+const GW=540,GH=960;
+let grainOC;
+try{grainOC=new OffscreenCanvas(GW,GH);}
+catch(e){grainOC=document.createElement('canvas');grainOC.width=GW;grainOC.height=GH;}
+const grainCtx=grainOC.getContext('2d');
+
+// Deterministic PRNG seeded by frame number
+function mulberry32(seed){
+  let s=seed|0;
+  return function(){
+    s=s+0x6D2B79F5|0;
+    let t=Math.imul(s^s>>>15,1|s);
+    t=t+Math.imul(t^t>>>7,61|t)^t;
+    return((t^t>>>14)>>>0)/4294967296;
+  };
+}
+
+function drawFX(t){
+  const frame=Math.round(t*30);
+  const rng=mulberry32(frame*73856093+19349663);
+
+  // Grain at half resolution, scaled to full size
+  const img=grainCtx.createImageData(GW,GH);
+  const d=img.data;
+  for(let i=0,n=GW*GH;i<n;i++){
+    const v=(rng()*46)|0; // 0–45
+    const p=i*4;
+    d[p]=v;d[p+1]=v;d[p+2]=v;d[p+3]=14; // alpha ≈5%
+  }
+  grainCtx.putImageData(img,0,0);
+
+  fxCtx.clearRect(0,0,W,H);
+  fxCtx.drawImage(grainOC,0,0,W,H); // scale to full size (blends as 2×2 blocks)
+
+  // Vignette (radial gradient darkening edges)
+  const vg=fxCtx.createRadialGradient(W/2,H*0.47,H*0.20,W/2,H*0.50,H*0.70);
+  vg.addColorStop(0,'rgba(0,0,0,0)');
+  vg.addColorStop(0.42,'rgba(0,0,0,0.05)');
+  vg.addColorStop(0.75,'rgba(0,0,0,0.30)');
+  vg.addColorStop(1,'rgba(0,0,0,0.65)');
+  fxCtx.fillStyle=vg;
+  fxCtx.fillRect(0,0,W,H);
+}
+
+// ─── FORMAT HELPERS ───────────────────────────────────────────────────────────
+function fmtHMS(sec){
+  const h=Math.floor(sec/3600),m=Math.floor((sec%3600)/60),s=Math.floor(sec%60);
+  return `${h}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+}
+function fmtMMS(sec){
+  const m=Math.floor(sec/60),s=Math.floor(sec%60);
+  return `${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+}
+function clamp01(x){return Math.max(0,Math.min(1,x));}
+function lerp(a,b,t){return a+(b-a)*t;}
+function easeOut(t){return 1-(1-t)*(1-t);}
+
+// ─── CARD BUILDER (driven purely by t) ───────────────────────────────────────
+function buildCard(idx,t){
+  const L=LINES[idx];
+  const lo=t-L.start; // seconds into this line
+
+  switch(L.card){
+    case 'countdown':{
+      // timer animates from 2:00:00 → 0:15:00 over the 2-second line
+      const v=lerp(7200,900,easeOut(clamp01(lo/1.9)));
+      return `
+        <div class="c-label">YOUR SESSION</div>
+        <div class="c-strike">2:00:00</div>
+        <div class="c-big c-accent">${fmtHMS(v)}</div>`;
+    }
+    case 'counters':{
+      const p=easeOut(clamp01(lo/1.8));
+      return `
+        <div class="ctr-row">
+          <div class="ctr-col"><div class="cval">${Math.round(lerp(0,15,p))}</div><div class="clbl">Min</div></div>
+          <div class="ctr-col"><div class="cval">${Math.round(lerp(0,4,p))}</div><div class="clbl">Moves</div></div>
+          <div class="ctr-col"><div class="cval">0</div><div class="clbl">Equipment</div></div>
+        </div>`;
+    }
+    case 'step1':{
+      // Checklist: ☑ Warm-up 2:00 ticks off; 2:00 timer counts down
+      const dur=6.5-4;
+      const remaining=Math.max(0,120-lo*(120/dur));
+      const ticked=lo>0.4; // tick off after 0.4s
+      return `
+        <ul class="cklist">
+          <li class="${ticked?'done':''}">
+            <span class="ckb${ticked?' on':''}">✓</span>
+            Warm-up 2:00
+          </li>
+        </ul>
+        <div class="c-tot" style="margin-top:14px">
+          <span style="color:#3BFFB0">${fmtMMS(remaining)}</span>
+        </div>`;
+    }
+    case 'jaw-drop':{
+      return `
+        <div class="c-big c-accent">15:00</div>
+        <div style="font-size:36px;font-weight:600;color:#8A97A8;margin-top:14px">No equipment. Any room.</div>`;
+    }
+    case 'cta':{
+      const pulse=1+Math.sin(lo*4.2)*0.07;
+      return `
+        <div class="cta-word" style="transform:scale(${pulse.toFixed(3)})">ROUTINE</div>
+        <div class="cta-sub">full guide ↓</div>`;
+    }
+    default:return '';
+  }
+}
+
+// ─── UI ELEMENTS ──────────────────────────────────────────────────────────────
+const chipEl=document.getElementById('chip');
+const cardEl=document.getElementById('card');
+const spkEl =document.getElementById('spk');
+const lineEl =document.getElementById('line');
+
+function getIdx(t){
+  for(let i=LINES.length-1;i>=0;i--)if(t>=LINES[i].start)return i;
+  return 0;
+}
+
+// ─── CHARACTER ANIMATION ──────────────────────────────────────────────────────
+function animVik(t,idx,speaking){
+  // Breathing bob
+  const br=Math.sin(t*2.1)*0.025;
+  vikTorso.scale.y=1+br;
+  vikHG.position.y=2.82+br*0.5;
+  vikNeck.position.y=2.38+br*0.3;
+
+  // Idle position sway (x drift)
+  vikG.position.x=-1.6+Math.sin(t*0.73)*0.03;
+  vikG.position.y=0;
+
+  // Default arm idle
+  vikALG.rotation.z= Math.sin(t*1.1)*0.1+0.08;
+  vikARG.rotation.z=-Math.sin(t*1.1)*0.1-0.08;
+
+  // Mouth + head when speaking
+  if(speaking){
+    vikHG.rotation.x=Math.sin(t*5.5)*0.06;
+    const open=Math.abs(Math.sin(t*8))*0.07;
+    vikMG.rotation.x=-open*2.2;
+    vikMouth.scale.y=1+open*4;
+    // Expressive arm gesture
+    vikALG.rotation.z=0.3+Math.sin(t*3)*0.22;
+    vikARG.rotation.z=-0.1-Math.sin(t*2.5)*0.16;
+  }else{
+    vikHG.rotation.x*=0.88;
+    vikMG.rotation.x*=0.88;
+    vikMouth.scale.y=1+(vikMouth.scale.y-1)*0.88;
+  }
+
+  // Per-line overrides (reset first)
+  vikHG.rotation.z=0;
+  vikBrowL.rotation.z=0;vikBrowR.rotation.z=0;
+  vikBrowL.position.y=0.26;vikBrowR.position.y=0.26;
+
+  if(idx===3){
+    // "That's it?" — jaw drop + raised brows
+    vikMG.rotation.x=-0.40;
+    vikMouth.scale.y=2.9;
+    vikBrowL.position.y=0.35;vikBrowR.position.y=0.35;
+  }
+}
+
+function animTick(t,idx,speaking){
+  // Second hand: continuous deterministic rotation (0.5 rev/s)
+  tickSHG.rotation.z=-t*Math.PI;
+
+  // Idle body bob
+  tickG.position.y=Math.sin(t*2.3)*0.038;
+
+  // Clock hand arms
+  if(speaking){
+    // Pointing gesture: hands swing outward and upward
+    // Math.PI/3 ≈ 1.05 rad = ~10 o'clock (upper-left)  for left hand
+    // -Math.PI/3 ≈ -1.05 rad = ~2 o'clock (upper-right) for right hand
+    tickALG.rotation.z=Math.PI/3+Math.sin(t*4)*0.15;
+    tickARG.rotation.z=-Math.PI/3-Math.sin(t*4+1)*0.15;
+  }else{
+    // Idle: 7-8 o'clock and 4-5 o'clock
+    tickALG.rotation.z=3*Math.PI/4;
+    tickARG.rotation.z=-3*Math.PI/4;
+  }
+
+  // Eye morph: | | (deadpan) → ^ ^ (pleased when step completes or speaking helpfully)
+  const pleased=[1,2].includes(idx)&&speaking; // lines 1,2 are SIDEKICK
+  if(pleased){
+    tickEL.rotation.z= 0.5;tickER.rotation.z=-0.5;
+    tickEL.scale.y=0.55;tickER.scale.y=0.55;
+  }else{
+    tickEL.rotation.z=0;tickER.rotation.z=0;
+    tickEL.scale.y=1;tickER.scale.y=1;
+  }
+
+  // Crown button bob on tick cues
+  const nearCue=window.cues.some(c=>Math.abs(t-c.t)<0.12&&c.type==='tick');
+  tickCrown.position.y=nearCue?1.955:2.00;
+  if(nearCue) tickG.position.y+=0.06; // extra bob
+}
+
+// ─── CAMERA ───────────────────────────────────────────────────────────────────
+function updateCam(t,idx){
+  const shot=SHOTS[Math.min(idx,SHOTS.length-1)];
+  const def=CAMD[shot.type];
+  const L=LINES[idx];
+  const p=clamp01((t-L.start)/(L.end-L.start));
+  // Slow push-in
+  const pushAmt=shot.push*p;
+  const dir=new THREE.Vector3().subVectors(def.tgt,def.pos).normalize();
+  const pos=def.pos.clone().addScaledVector(dir,pushAmt*3);
+  // Deterministic micro-wobble (seeded by line index)
+  const w=0.0022;
+  camera.position.set(
+    pos.x+Math.sin(t*0.47+idx*2.1)*w,
+    pos.y+Math.sin(t*0.63+idx*3.3)*w,
+    pos.z
+  );
+  camera.lookAt(def.tgt);
+  // Update FOV per shot type
+  if(camera.fov!==def.fov){camera.fov=def.fov;camera.updateProjectionMatrix();}
+  // Adjust fog density: closer shot = slightly more blur on background
+  scene.fog.density=shot.type==='wide'?0.018:0.027;
+}
+
+// ─── RENDER FRAME ─────────────────────────────────────────────────────────────
+window.renderFrame=function(t){
+  t=Math.max(0,Math.min(t,TOTAL));
+  const idx=getIdx(t);
+  const L=LINES[idx];
+  const meSpk =L.speaker==='ME';
+  const tickSpk=L.speaker==='SIDEKICK';
+
+  // 3D scene
+  animVik(t,idx,meSpk);
+  animTick(t,idx,tickSpk);
+  updateCam(t,idx);
+  renderer.render(scene,camera);
+
+  // FX overlay (grain + vignette, deterministic by frame)
+  drawFX(t);
+
+  // UI
+  chipEl.textContent=L.chip;
+  cardEl.innerHTML=buildCard(idx,t);
+  spkEl.textContent=L.name;
+  lineEl.textContent=L.line;
+};
+
+// ─── READY PROMISE ────────────────────────────────────────────────────────────
+// renderFrame is already defined above (synchronous). Fonts load async with timeout.
+window.ready=(async()=>{
+  try{
+    await Promise.race([
+      new FontFace('Inter',
+        'url(https://fonts.gstatic.com/s/inter/v13/UcCO3FwrK3iLTeHuS_fvQtMwCp50KnMw2boKoduKmMEVuLyfAZ9hiJ-Ek-_EeA.woff2)'
+      ).load().then(f=>{document.fonts.add(f);}),
+      new Promise(r=>setTimeout(r,3500)),
+    ]);
+  }catch(e){/* use system font */}
+  window.renderFrame(0);
+  window.__READY_TO_RENDER__=true;
+})();
+</script>
+</body>
+</html>
+

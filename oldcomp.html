@@ -1,0 +1,676 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Reel – You need 2 hours at the gym</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{width:1080px;height:1920px;overflow:hidden;background:#0d1b2a;font-family:'Inter','Segoe UI',Arial,sans-serif}
+#canvas-wrap{position:relative;width:1080px;height:1920px}
+canvas{display:block;position:absolute;top:0;left:0;width:1080px!important;height:1920px!important}
+#ui{position:absolute;top:0;left:0;width:1080px;height:1920px;pointer-events:none}
+
+#chip{
+  position:absolute;top:72px;left:50%;transform:translateX(-50%);
+  background:#ffe034;color:#0d1b2a;
+  padding:14px 36px;border-radius:60px;
+  font-size:30px;font-weight:800;letter-spacing:2px;text-transform:uppercase;
+  white-space:nowrap;
+  box-shadow:0 4px 24px rgba(255,224,52,0.28);
+}
+
+#card{
+  position:absolute;top:230px;left:50%;transform:translateX(-50%);
+  background:rgba(13,27,42,0.92);border:2px solid rgba(255,255,255,0.12);
+  border-radius:28px;padding:36px 48px;width:900px;min-height:200px;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  color:#fff;font-size:34px;line-height:1.5;
+  box-shadow:0 8px 60px rgba(0,0,0,0.5);
+}
+.card-title{font-size:28px;font-weight:700;color:#ffe034;margin-bottom:18px;letter-spacing:1px}
+.big-num{font-size:88px;font-weight:900;color:#fff;line-height:1}
+.counter-row{display:flex;gap:48px;align-items:flex-end;margin-top:12px}
+.counter-col{text-align:center}
+.counter-val{font-size:66px;font-weight:900;color:#ffe034;line-height:1}
+.counter-label{font-size:24px;color:#8ea8c3;margin-top:4px;font-weight:600}
+.rule-text{font-size:72px;font-weight:900;line-height:1.1;text-align:center}
+.rule-text .gt{color:#ffe034}
+.checklist{list-style:none;text-align:left;width:100%}
+.checklist li{font-size:32px;padding:10px 0;display:flex;align-items:center;gap:16px;color:#c8d8e8}
+.checklist li.done{color:#fff}
+.check-box{width:36px;height:36px;border:3px solid #8ea8c3;border-radius:8px;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:22px}
+.check-box.ticked{background:#3dffa0;border-color:#3dffa0;color:#0d1b2a}
+.energy-bar-wrap{width:100%;margin-top:12px}
+.energy-label{font-size:28px;color:#8ea8c3;margin-bottom:10px}
+.energy-bar{height:32px;background:#1e3050;border-radius:16px;overflow:hidden}
+.energy-fill{height:100%;border-radius:16px;background:linear-gradient(90deg,#ffe034,#ff8c00)}
+.icon-row{display:flex;gap:36px;margin-top:8px;align-items:center;flex-wrap:wrap;justify-content:center}
+.move-icon{
+  width:140px;height:140px;background:rgba(255,255,255,0.08);
+  border-radius:20px;display:flex;flex-direction:column;align-items:center;justify-content:center;
+  font-size:52px;color:#fff;border:2px solid transparent;
+  position:relative;
+}
+.move-icon.active{border-color:#ffe034;background:rgba(255,224,52,0.1)}
+.move-icon .move-label{font-size:17px;color:#8ea8c3;margin-top:6px;font-weight:600;letter-spacing:0.5px}
+.move-icon .check-badge{
+  position:absolute;top:-10px;right:-10px;width:32px;height:32px;
+  background:#3dffa0;border-radius:50%;display:flex;align-items:center;justify-content:center;
+  font-size:18px;color:#0d1b2a;font-weight:900;
+}
+.round-dots{display:flex;gap:28px;margin-top:12px}
+.round-dot{width:52px;height:52px;border-radius:50%;background:#1e3050;border:3px solid #2a4a70}
+.round-dot.filled{background:#ffe034;border-color:#ffe034}
+.total-time{font-size:62px;font-weight:900;color:#fff;margin-top:18px}
+.total-time .accent{color:#ffe034}
+.calendar-grid{display:grid;grid-template-columns:repeat(7,60px);gap:14px;margin-top:12px}
+.cal-day{width:60px;height:60px;border-radius:12px;background:#1e3050;border:2px solid #2a4a70;
+  display:flex;align-items:center;justify-content:center;font-size:28px;color:#2a4a70}
+.cal-day.ticked{background:#3dffa0;border-color:#3dffa0;color:#0d1b2a;font-size:30px;font-weight:900}
+.cta-word{font-size:110px;font-weight:900;color:#ffe034;letter-spacing:4px;line-height:1}
+.cta-sub{font-size:34px;color:#8ea8c3;margin-top:12px;font-weight:600}
+.jaw-drop{font-size:90px;font-weight:900;color:#fff;text-align:center}
+.countdown-timer{font-size:100px;font-weight:900;color:#fff;text-align:center;line-height:1.2}
+.countdown-timer .strike{text-decoration:line-through;color:#ff4444;font-size:60px}
+.countdown-timer .accent{color:#ffe034}
+.done-stamp{
+  font-size:60px;font-weight:900;color:#3dffa0;border:5px solid #3dffa0;
+  padding:8px 32px;border-radius:16px;margin-top:16px;
+  display:inline-block;letter-spacing:4px;transform:rotate(-3deg);
+}
+@keyframes wobble{0%{transform:rotate(-5deg)}100%{transform:rotate(5deg)}}
+
+#subtitle{
+  position:absolute;bottom:100px;left:50%;transform:translateX(-50%);
+  width:960px;text-align:center;
+  background:rgba(0,0,0,0.65);border-radius:16px;padding:22px 36px;
+  color:#fff;font-size:36px;line-height:1.5;font-weight:500;
+}
+#subtitle .speaker{font-size:24px;font-weight:700;color:#ffe034;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:6px}
+</style>
+</head>
+<body>
+<div id="canvas-wrap">
+  <canvas id="bg"></canvas>
+  <div id="ui">
+    <div id="chip"></div>
+    <div id="card"></div>
+    <div id="subtitle"><div class="speaker" id="spk-name"></div><span id="spk-line"></span></div>
+  </div>
+</div>
+
+<script type="importmap">{"imports":{"three":"./node_modules/three/build/three.module.js","three/addons/":"./node_modules/three/examples/jsm/"}}</script>
+<script type="module">
+import * as THREE from 'three';
+
+const W=1080,H=1920,ASPECT=W/H;
+const ACCENT=0xffe034;
+
+// ── SCRIPT ──────────────────────────────────────────────────────────────────
+const LINES=[
+  {start:0,   end:1.5,  speaker:'ME',      name:'COACH VIK',
+   line:"You don't need two hours at the gym!",
+   chip:'MYTH: 2 HOURS AT THE GYM', card:'countdown'},
+  {start:1.5, end:3.5,  speaker:'SIDEKICK',name:'TICK',
+   line:"Fifteen minutes. Four moves. Zero equipment.",
+   chip:'TICK, THE STOPWATCH', card:'counters'},
+  {start:3.5, end:6,    speaker:'ME',      name:'COACH VIK',
+   line:"Tick, prove it. I trained two hours today.",
+   chip:'COACH VIK — 2 HOURS TODAY', card:'energy'},
+  {start:6,   end:8.5,  speaker:'SIDEKICK',name:'TICK',
+   line:"Longer isn't better. Consistent is better.",
+   chip:'THE RULE', card:'rule'},
+  {start:8.5, end:11,   speaker:'ME',      name:'COACH VIK',
+   line:"Fine. Teach me the fifteen-minute routine.",
+   chip:'THE 15-MINUTE ROUTINE', card:'checklist0'},
+  {start:11,  end:14,   speaker:'SIDEKICK',name:'TICK',
+   line:"Step one. Warm up. Two minutes.",
+   chip:'STEP 1: WARM-UP', card:'step1'},
+  {start:14,  end:17.5, speaker:'SIDEKICK',name:'TICK',
+   line:"Step two. Squat, pushup, lunge, plank.",
+   chip:'STEP 2: FOUR MOVES', card:'step2'},
+  {start:17.5,end:20,   speaker:'ME',      name:'COACH VIK',
+   line:"Pushups hurt my knees, Tick.",
+   chip:'STEP 2: FOUR MOVES', card:'knee-ouch'},
+  {start:20,  end:22.5, speaker:'SIDEKICK',name:'TICK',
+   line:"Knees down is fine. Keep going.",
+   chip:'KNEES DOWN COUNTS', card:'knee-ok'},
+  {start:22.5,end:26,   speaker:'SIDEKICK',name:'TICK',
+   line:"Step three. Forty seconds on, twenty off.",
+   chip:'STEP 3: 40 ON / 20 OFF', card:'interval'},
+  {start:26,  end:29,   speaker:'SIDEKICK',name:'TICK',
+   line:"Step four. Three rounds. Twelve minutes total.",
+   chip:'STEP 4: 3 ROUNDS', card:'rounds'},
+  {start:29,  end:31.5, speaker:'SIDEKICK',name:'TICK',
+   line:"Step five. Stretch one minute. Done.",
+   chip:'STEP 5: STRETCH', card:'step5'},
+  {start:31.5,end:34,   speaker:'ME',      name:'COACH VIK',
+   line:"That's it? Fifteen minutes, no equipment?",
+   chip:'NO EQUIPMENT, ANY ROOM', card:'jaw-drop'},
+  {start:34,  end:36,   speaker:'SIDEKICK',name:'TICK',
+   line:"Every day beats one big day.",
+   chip:'CONSISTENCY WINS', card:'calendar'},
+  {start:36,  end:40,   speaker:'ME',      name:'COACH VIK',
+   line:'Comment "Routine" and I\'ll send you the full guide.',
+   chip:'COMMENT "ROUTINE"', card:'cta'},
+];
+
+window.cues=[
+  {t:11,   type:'tick'},
+  {t:14,   type:'tick'},
+  {t:17.5, type:'tick'},
+  {t:22.5, type:'tick'},
+  {t:26,   type:'tick'},
+  {t:29,   type:'tick'},
+  {t:31.5, type:'chime'},
+  {t:34,   type:'tick'},
+  {t:36,   type:'chime'},
+];
+
+// ── CAMERA SHOTS ─────────────────────────────────────────────────────────────
+const SHOTS=[
+  {type:'closeup-me',push:0.04},{type:'closeup-tick',push:0.04},
+  {type:'closeup-me',push:0.03},{type:'closeup-tick',push:0.03},
+  {type:'closeup-me',push:0.03},
+  {type:'wide',push:0.025},{type:'wide',push:0.025},
+  {type:'closeup-me',push:0.04},
+  {type:'wide',push:0.025},{type:'wide',push:0.025},
+  {type:'wide',push:0.025},{type:'wide',push:0.025},
+  {type:'closeup-me',push:0.04},
+  {type:'closeup-tick',push:0.04},
+  {type:'closeup-me',push:0.03},
+];
+
+const CAM_DEFS={
+  'wide':         {pos:new THREE.Vector3(0,2.5,10),   tgt:new THREE.Vector3(0,1.6,0)},
+  'closeup-me':   {pos:new THREE.Vector3(-1.6,2.9,6.2),tgt:new THREE.Vector3(-1.6,2.5,0)},
+  'closeup-tick': {pos:new THREE.Vector3(1.8,2.1,5.8), tgt:new THREE.Vector3(1.8,1.72,0)},
+};
+
+// ── THREE SETUP ───────────────────────────────────────────────────────────────
+const canvas=document.getElementById('bg');
+const renderer=new THREE.WebGLRenderer({canvas,antialias:true,preserveDrawingBuffer:true});
+renderer.setSize(W,H);renderer.setPixelRatio(1);
+renderer.toneMapping=THREE.ACESFilmicToneMapping;renderer.toneMappingExposure=1.1;
+renderer.shadowMap.enabled=true;renderer.shadowMap.type=THREE.PCFSoftShadowMap;
+
+const scene=new THREE.Scene();
+scene.background=new THREE.Color(0x0d1b2a);
+scene.fog=new THREE.FogExp2(0x0a1520,0.022);
+
+const camera=new THREE.PerspectiveCamera(42,ASPECT,0.1,100);
+camera.position.set(0,2.5,10);camera.lookAt(0,1.6,0);
+
+// ── MATERIAL HELPERS ──────────────────────────────────────────────────────────
+const mk=(color,rough=0.7,metal=0,extra={})=>new THREE.MeshStandardMaterial({color,...extra,roughness:rough,metalness:metal});
+const mkT=(color,opacity,extra={})=>new THREE.MeshStandardMaterial({color,transparent:true,opacity,...extra,roughness:1,metalness:0,depthWrite:false});
+
+const MAT={
+  floor:    mk(0x192a3c,0.3,0.6),
+  rubberMat:mk(0x0f1e2d,0.95),
+  backWall: mk(0x0d1b2a,0.85),
+  trim:     mk(0xdde8f0,0.5,0.1),
+  rack:     mk(0x1c2e42,0.65,0.4),
+  rackBar:  mk(0x2a3f55,0.4,0.6),
+  accent:   mk(0xffe034,0.4,0.3,{emissive:new THREE.Color(0xffe034).multiplyScalar(0.08)}),
+  plant:    mk(0x1a4a2e,0.9),
+  pot:      mk(0x2a1f1a,0.85),
+  winGlass: mkT(0xd0eeff,0.15,{side:THREE.DoubleSide}),
+  winFrame: mk(0xe8e8e8,0.4,0.1),
+  skinVik:  mk(0xd4956a,0.72),
+  eyeWhite: mk(0xffffff,0.3,0,{emissive:new THREE.Color(0x111111)}),
+  pupil:    mk(0x0a0a0a,0.4),
+  glint:    mk(0xffffff,0,0,{emissive:new THREE.Color(0xffffff),emissiveIntensity:1}),
+  trackTop: mk(0x1a3050,0.82),
+  trackBot: mk(0x152840,0.82),
+  shoe:     mk(0xf0f0f0,0.5,0.1),
+  brow:     mk(0x150e06,0.9),
+  mouthBox: mk(0x180808,0.9),
+  teeth:    mk(0xfafafa,0.4),
+  tickBody: mk(0xd8d8d8,0.35,0.35),
+  tickFaceM:mk(0xfafafa,0.25,0.1),
+  tickEye:  mk(0x0d1b2a,0.5),
+  tickArm:  mk(0xc0c0c0,0.4,0.3),
+  tickAcct: mk(0xffe034,0.3,0.2,{emissive:new THREE.Color(0xffe034).multiplyScalar(0.2)}),
+  blobShad: mkT(0x000000,0.22),
+  wGlow:    mkT(0xfff5e0,0.3,{side:THREE.DoubleSide}),
+  dustGlow: mkT(0xfff8e0,0.07,{side:THREE.DoubleSide}),
+  bench:    mk(0x1a2d3e,0.7),
+};
+
+// ── GEO HELPERS ───────────────────────────────────────────────────────────────
+function bx(w,h,d,mat,px=0,py=0,pz=0,rx=0,ry=0,rz=0){
+  const m=new THREE.Mesh(new THREE.BoxGeometry(w,h,d),mat);
+  m.position.set(px,py,pz);m.rotation.set(rx,ry,rz);
+  m.castShadow=true;m.receiveShadow=true;return m;
+}
+function cy(r,h,mat,px=0,py=0,pz=0){
+  const m=new THREE.Mesh(new THREE.CylinderGeometry(r,r,h,16),mat);
+  m.position.set(px,py,pz);m.castShadow=true;m.receiveShadow=true;return m;
+}
+function add(parent,...kids){kids.forEach(k=>parent.add(k));return parent;}
+
+// ── ENVIRONMENT ───────────────────────────────────────────────────────────────
+// Floor
+const floorM=new THREE.Mesh(new THREE.PlaneGeometry(32,32),MAT.floor);
+floorM.rotation.x=-Math.PI/2;floorM.receiveShadow=true;scene.add(floorM);
+// Rubber mat center
+const rubM=new THREE.Mesh(new THREE.PlaneGeometry(5.5,7.5),MAT.rubberMat);
+rubM.rotation.x=-Math.PI/2;rubM.position.y=0.001;rubM.receiveShadow=true;scene.add(rubM);
+// Back wall
+scene.add(bx(32,18,0.3,MAT.backWall,0,9,-6.2));
+scene.add(bx(32,0.2,0.4,MAT.trim,0,0.1,-6.0)); // base trim
+scene.add(bx(32,0.2,0.4,MAT.trim,0,16,-6.0)); // top trim
+// Window wall (left)
+scene.add(bx(0.3,18,32,MAT.backWall,-9,9,0));
+// Window panes
+for(let i=0;i<3;i++){
+  const pane=new THREE.Mesh(new THREE.PlaneGeometry(2.6,5.8),MAT.winGlass);
+  pane.position.set(-8.82,3.5+i*5.9,-2+i*2.5);pane.rotation.y=Math.PI/2;scene.add(pane);
+  // Frames
+  [[0,-3.1,0],[0,3.1,0],[-1.4,0,0],[1.4,0,0]].forEach(([fx,fy,fz])=>{
+    const isH=fx===0&&fy!==0;
+    scene.add(bx(isH?2.8:0.1,isH?0.1:5.9,0.1,MAT.winFrame,-8.78+(isH?0:fx),3.5+i*5.9+fy,-2+i*2.5+(isH?0:0)));
+  });
+}
+// Light shafts
+const shaft1=new THREE.Mesh(new THREE.PlaneGeometry(3.5,13),MAT.dustGlow);
+shaft1.position.set(-4.5,5,0);shaft1.rotation.y=0.25;scene.add(shaft1);
+const shaft2=new THREE.Mesh(new THREE.PlaneGeometry(2.5,11),MAT.dustGlow);
+shaft2.position.set(-3.5,4.5,2);shaft2.rotation.y=0.3;scene.add(shaft2);
+// Window glow bloom
+const wglow=new THREE.Mesh(new THREE.PlaneGeometry(3,10),MAT.wGlow);
+wglow.position.set(-8.6,5.5,0);wglow.rotation.y=Math.PI/2;scene.add(wglow);
+
+// Squat rack (right background)
+{
+  const rg=new THREE.Group();rg.position.set(5.5,0,-4.5);
+  rg.add(bx(0.14,3.4,0.14,MAT.rack,-0.72,1.7,0));
+  rg.add(bx(0.14,3.4,0.14,MAT.rack, 0.72,1.7,0));
+  rg.add(bx(0.14,3.4,0.14,MAT.rack,-0.72,1.7,-1.1));
+  rg.add(bx(0.14,3.4,0.14,MAT.rack, 0.72,1.7,-1.1));
+  rg.add(bx(1.56,0.1,0.1,MAT.rackBar,0,2.9,0));
+  rg.add(bx(1.56,0.1,0.1,MAT.rackBar,0,2.5,-1.1));
+  rg.add(bx(1.56,0.1,0.1,MAT.rackBar,0,1.7,-0.55));
+  rg.add(bx(2.9,0.07,0.07,MAT.rackBar,0,2.6,-0.4));
+  rg.add(bx(1.56,0.055,0.055,MAT.accent,0,2.1,-0.55));
+  scene.add(rg);
+}
+// Bench
+{
+  const bg=new THREE.Group();bg.position.set(-5.8,0,-3.8);
+  bg.add(bx(2.1,0.22,0.68,MAT.bench,0,0.98,0));
+  [[-0.9,-0.28],[0.9,-0.28],[-0.9,0.28],[0.9,0.28]].forEach(([x,z])=>bg.add(bx(0.09,0.98,0.09,MAT.rackBar,x,0.49,z)));
+  scene.add(bg);
+}
+// Dumbbell rack
+{
+  const drg=new THREE.Group();drg.position.set(6.5,0,-5.3);
+  drg.add(bx(2.1,1.3,0.45,MAT.rack,0,0.65,0));
+  for(let i=0;i<3;i++){
+    drg.add(cy(0.13,0.65,MAT.rackBar,-0.65+i*0.65,1.38,0));
+    drg.add(cy(0.21,0.17,MAT.rack,-0.65+i*0.65,1.38,0.32));
+    drg.add(cy(0.21,0.17,MAT.rack,-0.65+i*0.65,1.38,-0.32));
+  }
+  scene.add(drg);
+}
+// Plant
+{
+  const pg=new THREE.Group();pg.position.set(7.8,0,-5.8);
+  pg.add(cy(0.3,0.55,MAT.pot,0,0.28,0));
+  for(let i=0;i<7;i++){
+    const a=i/7*Math.PI*2;
+    pg.add(bx(0.07,1,0.04,MAT.plant,Math.cos(a)*0.18,0.95,Math.sin(a)*0.18,0,0,a+0.4));
+  }
+  scene.add(pg);
+}
+
+// ── COACH VIK ─────────────────────────────────────────────────────────────────
+const vikG=new THREE.Group();vikG.position.set(-1.6,0,0);
+
+// Legs & feet
+const vikLegL=bx(0.36,1.12,0.33,MAT.trackBot,-0.23,0.56,0);
+const vikLegR=bx(0.36,1.12,0.33,MAT.trackBot, 0.23,0.56,0);
+const vikShoeL=bx(0.36,0.19,0.52,MAT.shoe,-0.23,0.095,0.1);
+const vikShoeR=bx(0.36,0.19,0.52,MAT.shoe, 0.23,0.095,0.1);
+// Torso
+const vikTorso=bx(0.9,1.12,0.44,MAT.trackTop,0,1.68,0);
+// Arms
+const vikArmLG=new THREE.Group();vikArmLG.position.set(-0.62,2.14,0);
+add(vikArmLG,bx(0.3,0.9,0.3,MAT.trackTop,0,-0.45,0),bx(0.26,0.72,0.26,MAT.skinVik,0,-1.08,0));
+const vikArmRG=new THREE.Group();vikArmRG.position.set( 0.62,2.14,0);
+add(vikArmRG,bx(0.3,0.9,0.3,MAT.trackTop,0,-0.45,0),bx(0.26,0.72,0.26,MAT.skinVik,0,-1.08,0));
+// Neck
+const vikNeck=bx(0.3,0.26,0.26,MAT.skinVik,0,2.3,0);
+// Head group
+const vikHG=new THREE.Group();vikHG.position.set(0,2.76,0);
+const vikHead=bx(0.92,0.88,0.74,MAT.skinVik,0,0,0);
+const vikBrowL=bx(0.3,0.08,0.09,MAT.brow,-0.22,0.26,0.37);
+const vikBrowR=bx(0.3,0.08,0.09,MAT.brow, 0.22,0.26,0.37);
+const vikEyLW=bx(0.24,0.19,0.07,MAT.eyeWhite,-0.22,0.1,0.37);
+const vikEyRW=bx(0.24,0.19,0.07,MAT.eyeWhite, 0.22,0.1,0.37);
+const vikPupL=bx(0.11,0.13,0.07,MAT.pupil,-0.22,0.07,0.4);
+const vikPupR=bx(0.11,0.13,0.07,MAT.pupil, 0.22,0.07,0.4);
+const vikGlL=bx(0.048,0.048,0.04,MAT.glint,-0.26,0.14,0.42);
+const vikGlR=bx(0.048,0.048,0.04,MAT.glint, 0.18,0.14,0.42);
+const vikMG=new THREE.Group();vikMG.position.set(0,-0.14,0.37);
+const vikMouth=bx(0.32,0.11,0.07,MAT.mouthBox,0,0,0);
+const vikTeeth=bx(0.27,0.07,0.05,MAT.teeth,0,0.08,0);
+add(vikMG,vikMouth,vikTeeth);
+const vikEarL=bx(0.09,0.22,0.09,MAT.skinVik,-0.5,0,0);
+const vikEarR=bx(0.09,0.22,0.09,MAT.skinVik, 0.5,0,0);
+add(vikHG,vikHead,vikBrowL,vikBrowR,vikEyLW,vikEyRW,vikPupL,vikPupR,vikGlL,vikGlR,vikMG,vikEarL,vikEarR);
+const vikShadow=new THREE.Mesh(new THREE.PlaneGeometry(1.15,0.58),MAT.blobShad);
+vikShadow.rotation.x=-Math.PI/2;vikShadow.position.set(0,0.001,0.1);
+add(vikG,vikLegL,vikLegR,vikShoeL,vikShoeR,vikTorso,vikArmLG,vikArmRG,vikNeck,vikHG,vikShadow);
+scene.add(vikG);
+
+// ── TICK ──────────────────────────────────────────────────────────────────────
+const tickG=new THREE.Group();tickG.position.set(1.8,0,0);
+
+const tickBody=new THREE.Mesh(new THREE.CylinderGeometry(0.54,0.54,0.44,32),MAT.tickBody);
+tickBody.position.set(0,1.74,0);tickBody.castShadow=true;
+const tickCrown=bx(0.15,0.24,0.15,MAT.tickBody,0,1.98,0);
+const tickLegL=bx(0.19,0.58,0.19,MAT.tickBody,-0.23,0.79,0);
+const tickLegR=bx(0.19,0.58,0.19,MAT.tickBody, 0.23,0.79,0);
+const tickFtL=bx(0.24,0.15,0.34,MAT.shoe,-0.23,0.5,0.07);
+const tickFtR=bx(0.24,0.15,0.34,MAT.shoe, 0.23,0.5,0.07);
+const tickALG=new THREE.Group();tickALG.position.set(-0.58,1.74,0);
+add(tickALG,bx(0.14,0.72,0.14,MAT.tickArm,0,-0.36,0),bx(0.1,0.22,0.1,MAT.tickAcct,0,-0.82,0));
+const tickARG=new THREE.Group();tickARG.position.set( 0.58,1.74,0);
+add(tickARG,bx(0.14,0.72,0.14,MAT.tickArm,0,-0.36,0),bx(0.1,0.22,0.1,MAT.tickAcct,0,-0.82,0));
+const tickFace=new THREE.Mesh(new THREE.CircleGeometry(0.44,32),MAT.tickFaceM);
+tickFace.position.set(0,1.74,0.545);
+// Eyes
+const tickELG=new THREE.Group();tickELG.position.set(-0.15,1.82,0.52);
+const tickEyeL=bx(0.072,0.19,0.04,MAT.tickEye,0,0,0);
+add(tickELG,tickEyeL);
+const tickERG=new THREE.Group();tickERG.position.set( 0.15,1.82,0.52);
+const tickEyeR=bx(0.072,0.19,0.04,MAT.tickEye,0,0,0);
+add(tickERG,tickEyeR);
+// Second hand pivot
+const tickHndG=new THREE.Group();tickHndG.position.set(0,1.74,0);
+const tickHand=bx(0.028,0.34,0.028,MAT.tickAcct,0,0.17,0.545);
+add(tickHndG,tickHand);
+// Tick marks on face (12 marks)
+for(let i=0;i<12;i++){
+  const a=i/12*Math.PI*2;
+  const r=0.36;
+  const mark=bx(0.025,0.07,0.025,MAT.tickEye,Math.sin(a)*r,1.74+Math.cos(a)*r,0.545);
+  tickG.add(mark);
+}
+const tickShadow=new THREE.Mesh(new THREE.PlaneGeometry(0.95,0.52),MAT.blobShad);
+tickShadow.rotation.x=-Math.PI/2;tickShadow.position.set(0,0.001,0.08);
+add(tickG,tickBody,tickCrown,tickLegL,tickLegR,tickFtL,tickFtR,
+    tickALG,tickARG,tickFace,tickELG,tickERG,tickHndG,tickShadow);
+scene.add(tickG);
+
+// ── LIGHTS ────────────────────────────────────────────────────────────────────
+const keyL=new THREE.DirectionalLight(0xfff3d0,3.0);
+keyL.position.set(-8,11,5);keyL.castShadow=true;
+keyL.shadow.mapSize.set(2048,2048);
+keyL.shadow.camera.left=-11;keyL.shadow.camera.right=11;
+keyL.shadow.camera.top=13;keyL.shadow.camera.bottom=-3;
+keyL.shadow.camera.near=1;keyL.shadow.camera.far=45;
+keyL.shadow.bias=-0.001;
+scene.add(keyL);
+const rimL=new THREE.DirectionalLight(0x8070ff,1.6);rimL.position.set(4,8,-9);scene.add(rimL);
+const fillL=new THREE.DirectionalLight(0xd0e8ff,0.55);fillL.position.set(5,4,8);scene.add(fillL);
+scene.add(new THREE.AmbientLight(0x1a2a40,1.3));
+
+// ── HELPERS ───────────────────────────────────────────────────────────────────
+function fmtHMS(sec){
+  const h=Math.floor(sec/3600),m=Math.floor((sec%3600)/60),s=Math.floor(sec%60);
+  return `${h}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+}
+function fmtMMS(sec){
+  const m=Math.floor(sec/60),s=Math.floor(sec%60);
+  return `${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+}
+function clamp01(x){return Math.max(0,Math.min(1,x));}
+function lerp(a,b,t){return a+(b-a)*t;}
+
+// ── CARD BUILDER ─────────────────────────────────────────────────────────────
+function buildCard(idx,t){
+  const L=LINES[idx];
+  const lo=t-L.start;
+  switch(L.card){
+    case 'countdown':{
+      const v=lerp(7200,900,clamp01(lo/1.4));
+      return `<div class="card-title">YOUR SESSION</div>
+        <div class="countdown-timer">
+          <div class="strike">2:00:00</div>
+          <div class="accent">${fmtHMS(v)}</div>
+        </div>`;
+    }
+    case 'counters':{
+      const p=clamp01(lo/1.8);
+      return `<div class="counter-row">
+        <div class="counter-col"><div class="counter-val">${Math.round(lerp(0,15,p))}</div><div class="counter-label">MIN</div></div>
+        <div class="counter-col"><div class="counter-val">${Math.round(lerp(0,4,p))}</div><div class="counter-label">MOVES</div></div>
+        <div class="counter-col"><div class="counter-val">0</div><div class="counter-label">EQUIPMENT</div></div>
+      </div>`;
+    }
+    case 'energy':{
+      const pct=Math.max(8,100-Math.round(clamp01(lo/2.4)*92));
+      return `<div class="card-title" style="color:#ff6b6b">COACH VIK — 2 HRS LOGGED</div>
+        <div class="energy-bar-wrap">
+          <div class="energy-label">ENERGY REMAINING</div>
+          <div class="energy-bar"><div class="energy-fill" style="width:${pct}%"></div></div>
+        </div>`;
+    }
+    case 'rule':
+      return `<div class="rule-text">Consistent <span class="gt">&gt;</span> Long</div>`;
+    case 'checklist0':
+      return `<ul class="checklist">
+        ${['☐ Warm-up 2:00','☐ Four moves','☐ Three rounds 12:00','☐ Stretch 1:00'].map(i=>`<li><span>${i}</span></li>`).join('')}
+      </ul><div style="margin-top:16px;font-size:28px;color:#ffe034;font-weight:800">= 15:00</div>`;
+    case 'step1':{
+      const dur=14-11;
+      const remaining=Math.max(0,120-lo*(120/dur));
+      return `<ul class="checklist">
+        <li class="done"><span class="check-box ticked">✓</span>Warm-up 2:00</li>
+        <li><span class="check-box"></span>Four moves</li>
+        <li><span class="check-box"></span>Three rounds 12:00</li>
+        <li><span class="check-box"></span>Stretch 1:00</li>
+      </ul>
+      <div class="total-time" style="margin-top:14px"><span class="accent">${fmtMMS(remaining)}</span></div>`;
+    }
+    case 'step2':{
+      const dur=17.5-14;
+      const moves=[['🏋️','SQUAT'],['💪','PUSHUP'],['🦵','LUNGE'],['🧘','PLANK']];
+      const nV=Math.min(4,Math.floor(lo/(dur/4))+1);
+      return `<div class="icon-row">${moves.slice(0,nV).map(([e,l],i)=>
+        `<div class="move-icon${i===nV-1?' active':''}"><span>${e}</span><span class="move-label">${l}</span></div>`
+      ).join('')}</div>`;
+    }
+    case 'knee-ouch':
+      return `<div class="icon-row">
+        <div class="move-icon active" style="border-color:#ff6b6b;animation:wobble 0.4s ease-in-out infinite alternate">
+          <span>💪</span><span class="move-label">PUSHUP</span>
+        </div>
+      </div><div style="font-size:28px;color:#ff6b6b;margin-top:16px">Ouch 😬</div>`;
+    case 'knee-ok':
+      return `<div class="icon-row">
+        <div class="move-icon active" style="border-color:#3dffa0">
+          <span>💪</span><span class="move-label">KNEES DOWN</span>
+          <span class="check-badge">✓</span>
+        </div>
+      </div><div style="font-size:28px;color:#3dffa0;margin-top:16px;font-weight:700">MODIFICATION ✓</div>`;
+    case 'interval':{
+      const cycle=60;
+      const phase=(lo*3)%cycle;
+      const isOn=phase<=40;
+      const sweep=Math.min(phase,40)/40;
+      const col=isOn?'#3dffa0':'#555';
+      const ang=sweep*Math.PI*2;
+      const r=86,cx=100,cy=100;
+      const ex=cx+r*Math.sin(ang),ey=cy-r*Math.cos(ang);
+      const big=ang>Math.PI?1:0;
+      const pathD=ang<0.01?'':`M${cx},${cy-r} A${r},${r},0,${big},1,${ex},${ey} L${cx},${cy} Z`;
+      return `<div class="card-title">INTERVAL TIMER</div>
+        <svg width="200" height="200" viewBox="0 0 200 200">
+          <circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="#1e3050" stroke-width="20"/>
+          ${pathD?`<path d="${pathD}" fill="${col}" opacity="0.85"/>`:''}
+          <circle cx="${cx}" cy="${cy}" r="${r-10}" fill="none" stroke="${col}" stroke-width="1.5"/>
+          <text x="${cx}" y="${cy-6}" text-anchor="middle" fill="#fff" font-size="28" font-weight="900" font-family="Inter,sans-serif">${isOn?'ON':'REST'}</text>
+          <text x="${cx}" y="${cy+22}" text-anchor="middle" fill="${col}" font-size="22" font-weight="700" font-family="Inter,sans-serif">${isOn?'40 SEC':'20 SEC'}</text>
+        </svg>`;
+    }
+    case 'rounds':{
+      const dur=29-26;
+      const p=clamp01(lo/dur);
+      const nF=Math.min(3,Math.floor(p*3)+1);
+      return `<div class="card-title">3 ROUNDS</div>
+        <div class="round-dots">
+          ${[0,1,2].map(i=>`<div class="round-dot${i<nF?' filled':''}"></div>`).join('')}
+        </div>
+        <div class="total-time">${fmtMMS(Math.round(p*720))} <span style="font-size:26px;color:#8ea8c3">/ 12:00</span></div>`;
+    }
+    case 'step5':{
+      const done=lo>1;
+      return `<ul class="checklist">
+        <li class="done"><span class="check-box ticked">✓</span>Warm-up 2:00</li>
+        <li class="done"><span class="check-box ticked">✓</span>Four moves</li>
+        <li class="done"><span class="check-box ticked">✓</span>Three rounds 12:00</li>
+        <li class="done"><span class="check-box ticked">✓</span>Stretch 1:00</li>
+      </ul>
+      <div class="total-time" style="margin-top:14px"><span class="accent">15:00</span></div>
+      ${done?'<div class="done-stamp">DONE</div>':''}`;
+    }
+    case 'jaw-drop':
+      return `<div class="jaw-drop"><span class="accent">15:00</span></div>
+        <div style="font-size:36px;color:#8ea8c3;margin-top:12px;font-weight:600">No equipment. Any room.</div>`;
+    case 'calendar':{
+      const dur=36-34;
+      const nT=Math.min(7,Math.ceil(lo/(dur/7)));
+      return `<div class="card-title">EVERY DAY</div>
+        <div class="calendar-grid">
+          ${Array(7).fill(0).map((_,i)=>`<div class="cal-day${i<nT?' ticked':''}">${i<nT?'✓':'·'}</div>`).join('')}
+        </div>`;
+    }
+    case 'cta':{
+      const pulse=1+Math.sin(lo*4)*0.07;
+      return `<div class="cta-word" style="transform:scale(${pulse.toFixed(3)})">ROUTINE</div>
+        <div class="cta-sub">full guide ↓</div>`;
+    }
+    default:return '';
+  }
+}
+
+// ── UI ELEMENTS ───────────────────────────────────────────────────────────────
+const chipEl=document.getElementById('chip');
+const cardEl=document.getElementById('card');
+const spkNameEl=document.getElementById('spk-name');
+const spkLineEl=document.getElementById('spk-line');
+
+function getIdx(t){
+  for(let i=LINES.length-1;i>=0;i--)if(t>=LINES[i].start)return i;
+  return 0;
+}
+
+// ── CHARACTER ANIMATION ───────────────────────────────────────────────────────
+function animVik(t,idx,speaking){
+  const breathe=Math.sin(t*2.1)*0.025;
+  vikTorso.scale.y=1+breathe;
+  vikHG.position.y=2.76+breathe*0.5;
+  vikG.position.x=-1.6+Math.sin(t*0.73)*0.03;
+  vikArmLG.rotation.z= Math.sin(t*1.1)*0.1+0.08;
+  vikArmRG.rotation.z=-Math.sin(t*1.1)*0.1-0.08;
+  if(speaking){
+    vikHG.rotation.x=Math.sin(t*5)*0.065;
+    const open=Math.abs(Math.sin(t*8))*0.07;
+    vikMG.rotation.x=-open*2;
+    vikMouth.scale.y=1+open*4;
+  }else{
+    vikHG.rotation.x*=0.85;
+    vikMG.rotation.x*=0.85;
+    vikMouth.scale.y=1+(vikMouth.scale.y-1)*0.85;
+  }
+  // Line-specific reactions
+  vikHG.rotation.z=0;
+  vikBrowL.rotation.z=0;vikBrowR.rotation.z=0;
+  vikBrowL.position.y=0.26;vikBrowR.position.y=0.26;
+  if(idx===7){// wince
+    vikHG.rotation.z=Math.sin(t*3)*0.07;
+    vikBrowL.rotation.z=0.2;vikBrowR.rotation.z=-0.2;
+  }
+  if(idx===12){// jaw drop
+    vikMG.rotation.x=-0.35;vikMouth.scale.y=2.6;
+    vikBrowL.position.y=0.34;vikBrowR.position.y=0.34;
+  }
+}
+
+function animTick(t,idx,speaking){
+  tickHndG.rotation.z=-t*Math.PI; // 1 rev per 2s
+  tickG.position.y=Math.sin(t*2.3)*0.038;
+  if(speaking){
+    tickALG.rotation.z= Math.sin(t*4)*0.3+0.4;
+    tickARG.rotation.z=-Math.sin(t*4+1)*0.3-0.4;
+  }else{
+    tickALG.rotation.z=0.15;tickARG.rotation.z=-0.15;
+  }
+  const pleased=[1,3,5,6,8,9,10,11,13].includes(idx)&&speaking;
+  if(pleased){
+    tickEyeL.rotation.z= 0.5;tickEyeR.rotation.z=-0.5;
+    tickEyeL.scale.y=0.55;tickEyeR.scale.y=0.55;
+  }else{
+    tickEyeL.rotation.z=0;tickEyeR.rotation.z=0;
+    tickEyeL.scale.y=1;tickEyeR.scale.y=1;
+  }
+  // Crown bob on tick cues
+  const nearCue=window.cues.some(c=>Math.abs(t-c.t)<0.13&&c.type==='tick');
+  tickCrown.position.y=nearCue?1.945:1.98;
+}
+
+// ── CAMERA ────────────────────────────────────────────────────────────────────
+function updateCam(t,idx){
+  const shot=SHOTS[Math.min(idx,SHOTS.length-1)];
+  const def=CAM_DEFS[shot.type];
+  const L=LINES[idx];
+  const p=clamp01((t-L.start)/(L.end-L.start));
+  const pushAmt=shot.push*p;
+  const dir=new THREE.Vector3().subVectors(def.tgt,def.pos).normalize();
+  const pos=def.pos.clone().addScaledVector(dir,pushAmt*3);
+  // Deterministic handheld wobble
+  const wobble=0.0025;
+  camera.position.set(
+    pos.x+Math.sin(t*0.47+idx*2.1)*wobble,
+    pos.y+Math.sin(t*0.63+idx*3.3)*wobble,
+    pos.z
+  );
+  camera.lookAt(def.tgt);
+}
+
+// ── RENDER FRAME ──────────────────────────────────────────────────────────────
+window.renderFrame=function(t){
+  t=Math.max(0,Math.min(t,40));
+  const idx=getIdx(t);
+  const L=LINES[idx];
+  const meSpk=L.speaker==='ME';
+  const tickSpk=L.speaker==='SIDEKICK';
+
+  animVik(t,idx,meSpk);
+  animTick(t,idx,tickSpk);
+  updateCam(t,idx);
+  renderer.render(scene,camera);
+
+  chipEl.textContent=L.chip;
+  cardEl.innerHTML=buildCard(idx,t);
+  spkNameEl.textContent=L.name;
+  spkLineEl.textContent=L.line;
+};
+
+// ── READY ─────────────────────────────────────────────────────────────────────
+window.ready=(async function(){
+  try{
+    const f=new FontFace('Inter',
+      'url(https://fonts.gstatic.com/s/inter/v13/UcCO3FwrK3iLTeHuS_fvQtMwCp50KnMw2boKoduKmMEVuLyfAZ9hiJ-Ek-_EeA.woff2)');
+    await f.load();document.fonts.add(f);
+  }catch(e){/* use system fallback */}
+  window.renderFrame(0);
+  window.__READY_TO_RENDER__=true;
+})();
+</script>
+</body>
+</html>
